@@ -764,5 +764,15 @@ main(int argc, char *argv[])
 		count += np->len;
 	}
 	fclose(ofp);
+
+	ohash_delete(&label_hash);
+
+	while ((np = TAILQ_FIRST(&rom)) != NULL) {
+		free(np->from_label);
+		free(np->to_label);
+		TAILQ_REMOVE(&rom, np, rom_entries);
+		free(np);
+	}
+
 	return 0;
 }
