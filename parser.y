@@ -694,6 +694,7 @@ main(int argc, char *argv[])
 	int count;
 	struct label_list *ll;
 	int i;
+	int ret = 0;
 
 	if (argc != 3)
 		return 1;
@@ -735,19 +736,23 @@ main(int argc, char *argv[])
 			ll = lookup_label(np->to_label);
 			if (!ll) {
 				fprintf(stderr, "label %s not found\n", np->to_label);
-				break;
+				ret = 1;
+				goto end;
 			}
 			if ((count & 0xff00) == (ll->addr & 0xff00))
 				bin |= ll->addr;
 			else {
 				fprintf(stderr, "cannot jump 0x%04x to 0x%04x\n", count, ll->addr);
+				ret = 1;
+				goto end;
 			}
 			break;
 		case AS_JUMP_LONG:
 			ll = lookup_label(np->to_label);
 			if (!ll) {
 				fprintf(stderr, "label %s not found\n", np->to_label);
-				break;
+				ret = 1;
+				goto end;
 			}
 			bin |= ll->addr;
 			break;
@@ -763,6 +768,9 @@ main(int argc, char *argv[])
 		}
 		count += np->len;
 	}
+
+end:
+
 	fclose(ofp);
 
 	ohash_delete(&label_hash);
@@ -774,5 +782,5 @@ main(int argc, char *argv[])
 		free(np);
 	}
 
-	return 0;
+	return ret;
 }
